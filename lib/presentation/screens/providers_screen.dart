@@ -33,11 +33,16 @@ class _ProvidersScreenState extends State<ProvidersScreen> {
       ),
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: SafeArea(
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Column(
-            children: [
+        body: GestureDetector(
+          onTap: () {
+            // إخفاء الكيبورد عند الضغط على مكان فارغ
+            FocusScope.of(context).unfocus();
+          },
+          child: SafeArea(
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Column(
+                children: [
               // Header Section
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
@@ -126,7 +131,6 @@ class _ProvidersScreenState extends State<ProvidersScreen> {
             ],
           ),
         ),
-      ),
       ),
     );
   }
@@ -576,8 +580,8 @@ class _VendorCard extends StatelessWidget {
               ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

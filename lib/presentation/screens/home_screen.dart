@@ -443,9 +443,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 15),
-          child: Column(
+        return GestureDetector(
+          onTap: () {
+            // إخفاء الكيبورد عند الضغط على مكان فارغ
+            FocusScope.of(context).unfocus();
+          },
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 15),
+            child: Column(
             children: [
               SizedBox(height: 20),
               Row(
@@ -662,6 +667,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ],
+          ),
           ),
         );
       },
@@ -1086,4 +1092,4 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
-}
+} 

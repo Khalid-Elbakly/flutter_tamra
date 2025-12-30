@@ -241,10 +241,15 @@ class _UpdateAccountScreenState extends State<UpdateAccountScreen> {
       ),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        body: SingleChildScrollView(
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Container(
+        body: GestureDetector(
+          onTap: () {
+            // إخفاء الكيبورد عند الضغط على مكان فارغ
+            FocusScope.of(context).unfocus();
+          },
+          child: SingleChildScrollView(
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Container(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
               decoration: const BoxDecoration(
@@ -495,6 +500,7 @@ class _UpdateAccountScreenState extends State<UpdateAccountScreen> {
               ),
             ),
           ),
+        ),
         ),
       ),
       ),

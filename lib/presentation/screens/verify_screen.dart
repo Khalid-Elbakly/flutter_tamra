@@ -214,10 +214,15 @@ class _VerifyScreenState extends State<VerifyScreen> {
         statusBarBrightness: Brightness.dark,
       ),
       child: Scaffold(
-        body: SingleChildScrollView(
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Container(
+        body: GestureDetector(
+          onTap: () {
+            // إخفاء الكيبورد عند الضغط على مكان فارغ
+            FocusScope.of(context).unfocus();
+          },
+          child: SingleChildScrollView(
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Container(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
               decoration: const BoxDecoration(
@@ -428,6 +433,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
               ),
             ),
           ),
+        ),
         ),
       ),
     );

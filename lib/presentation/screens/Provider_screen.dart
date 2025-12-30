@@ -271,9 +271,14 @@ class _ProviderScreenState extends State<ProviderScreen> {
             ],
           ),
         ),
-        body: Directionality(
-          textDirection: TextDirection.rtl,
-          child: Padding(
+        body: GestureDetector(
+          onTap: () {
+            // إخفاء الكيبورد عند الضغط على مكان فارغ
+            FocusScope.of(context).unfocus();
+          },
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 15),
             child: Column(
               children: [
@@ -864,6 +869,7 @@ class _ProviderScreenState extends State<ProviderScreen> {
               ],
             ),
           ),
+        ),
         ),
       ),
     );

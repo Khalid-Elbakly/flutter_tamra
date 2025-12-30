@@ -158,7 +158,12 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
               ],
             ),
           ),
-        body: Form(
+        body: GestureDetector(
+          onTap: () {
+            // إخفاء الكيبورد عند الضغط على مكان فارغ
+            FocusScope.of(context).unfocus();
+          },
+          child: Form(
           key: _formKey,
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
@@ -323,6 +328,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
               ],
             ),
           ),
+        ),
         ),
       ),
     );
