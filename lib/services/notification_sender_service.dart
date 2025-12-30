@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/foundation.dart';
 
 class NotificationSenderService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -55,7 +57,50 @@ class NotificationSenderService {
       );
     } catch (e) {
       // خطأ في إرسال الإشعار
-      // يمكن إضافة logging هنا للتحقق من الخطأ
+      if (kDebugMode) {
+        debugPrint('❌ خطأ في sendNewOrderNotification: $e');
+      }
+    }
+  }
+
+  /// الحصول على Service Account JSON من مصادر مختلفة
+  Future<String?> _getServiceAccountJson() async {
+    // 1. محاولة قراءة من Environment Variable (لـ CI/CD)
+    // ملاحظة: Platform.environment يعمل فقط على Desktop/Mobile، ليس Web
+    try {
+      final envServiceAccount = Platform.environment['FIREBASE_SERVICE_ACCOUNT_JSON'];
+      if (envServiceAccount != null && envServiceAccount.isNotEmpty) {
+        if (kDebugMode) {
+          debugPrint('✅ تم قراءة Service Account من Environment Variable');
+        }
+        return envServiceAccount;
+      }
+    } catch (e) {
+      // Platform.environment غير متاح (مثل Web)
+      // نستمر للمحاولة التالية
+      if (kDebugMode) {
+        debugPrint('⚠️ Environment Variables غير متاحة على هذه المنصة');
+      }
+    }
+
+    // 2. محاولة قراءة من ملف في assets (للتطوير المحلي)
+    try {
+      final assetJson = await rootBundle.loadString(_serviceAccountPath);
+      if (kDebugMode) {
+        debugPrint('✅ تم قراءة Service Account من assets');
+      }
+      return assetJson;
+    } catch (e) {
+      // الملف غير موجود - هذا طبيعي في CI/CD
+      if (kDebugMode) {
+        debugPrint('⚠️ Service Account غير متوفر من assets أو Environment Variables');
+        debugPrint('   للحصول على إشعارات في CI/CD:');
+        debugPrint('   1. أضف Environment Variable: FIREBASE_SERVICE_ACCOUNT_JSON');
+        debugPrint('   2. قم بتعيينه إلى محتوى service-account.json كـ JSON string');
+        debugPrint('   راجع CI_CD_SETUP.md للتفاصيل');
+        debugPrint('   الخطأ: $e');
+      }
+      return null;
     }
   }
 
@@ -69,9 +114,22 @@ class NotificationSenderService {
         }
       }
 
-      // قراءة Service Account JSON
-      final serviceAccountJson = await rootBundle.loadString(_serviceAccountPath);
-      final serviceAccount = jsonDecode(serviceAccountJson) as Map<String, dynamic>;
+      // الحصول على Service Account JSON
+      final serviceAccountJson = await _getServiceAccountJson();
+      if (serviceAccountJson == null) {
+        return null;
+      }
+
+      // فك تشفير JSON
+      Map<String, dynamic> serviceAccount;
+      try {
+        serviceAccount = jsonDecode(serviceAccountJson) as Map<String, dynamic>;
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('❌ خطأ في فك تشفير Service Account JSON: $e');
+        }
+        return null;
+      }
 
       // إنشاء ServiceAccountCredentials
       final credentials = ServiceAccountCredentials.fromJson(serviceAccount);
@@ -86,10 +144,16 @@ class NotificationSenderService {
       _cachedAccessToken = authClient.credentials.accessToken.data;
       _tokenExpiry = authClient.credentials.accessToken.expiry;
 
+      if (kDebugMode) {
+        debugPrint('✅ تم الحصول على OAuth2 access token بنجاح');
+      }
+
       return _cachedAccessToken;
     } catch (e) {
-      // خطأ في الحصول على access token
-      // قد يكون الملف غير موجود - راجع التعليمات
+      // خطأ عام في الحصول على access token
+      if (kDebugMode) {
+        debugPrint('❌ خطأ في الحصول على OAuth2 access token: $e');
+      }
       return null;
     }
   }
@@ -147,10 +211,20 @@ class NotificationSenderService {
 
       if (response.statusCode != 200) {
         // خطأ في إرسال الإشعار
-        // يمكنك إضافة logging هنا للتحقق من الخطأ
+        if (kDebugMode) {
+          debugPrint('❌ فشل إرسال الإشعار - Status Code: ${response.statusCode}');
+          debugPrint('   Response: ${response.body}');
+        }
+      } else {
+        if (kDebugMode) {
+          debugPrint('✅ تم إرسال الإشعار بنجاح');
+        }
       }
     } catch (e) {
       // خطأ في إرسال الإشعار
+      if (kDebugMode) {
+        debugPrint('❌ خطأ في إرسال الإشعار: $e');
+      }
     }
   }
 }
