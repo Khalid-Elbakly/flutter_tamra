@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:async';
 
 class AuthService {
@@ -29,6 +30,11 @@ class AuthService {
         formattedPhone = '+966$formattedPhone';
       }
 
+      if (kDebugMode) {
+        debugPrint('📞 رقم الجوال المُنسق: $formattedPhone');
+        debugPrint('🔄 بدء عملية verifyPhoneNumber...');
+      }
+
       // إرسال OTP
       await _auth.verifyPhoneNumber(
         phoneNumber: formattedPhone,
@@ -39,6 +45,9 @@ class AuthService {
         verificationFailed: (FirebaseAuthException e) {
           // في iOS و Android، قد يتم استدعاء هذا callback من thread مختلف
           // لذلك نستخدم Future.microtask لضمان التنفيذ في main thread في جميع المنصات
+          if (kDebugMode) {
+            debugPrint('❌ verificationFailed: ${e.code} - ${e.message}');
+          }
           Future.microtask(() {
             onError(_getErrorMessage(e.code));
           });
@@ -48,7 +57,14 @@ class AuthService {
           // في iOS و Android، قد يتم استدعاء هذا callback من thread مختلف
           // لذلك نستخدم Future.microtask لضمان التنفيذ في main thread في جميع المنصات
           // هذا يضمن أن callback يتم استدعاؤه في الدورة التالية من event loop
+          if (kDebugMode) {
+            debugPrint('✅ codeSent callback تم استدعاؤه - verificationId: $verificationId');
+            debugPrint('🔄 استخدام Future.microtask للانتقال إلى main thread...');
+          }
           Future.microtask(() {
+            if (kDebugMode) {
+              debugPrint('✅ استدعاء onCodeSent الآن في main thread');
+            }
             onCodeSent(verificationId);
           });
         },

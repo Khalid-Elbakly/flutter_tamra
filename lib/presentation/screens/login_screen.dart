@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:tamra/presentation/screens/verify_screen.dart';
 import 'package:tamra/services/auth_service.dart';
 
@@ -16,6 +17,27 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    // في وضع التطوير، إضافة رقم جوال افتراضي للاختبار وإرسال تلقائي
+    if (kDebugMode) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _phoneController.text = '0501234567'; // رقم افتراضي للاختبار
+          
+          // إرسال OTP تلقائياً بعد ثانيتين للاختبار السريع
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted && !_isLoading && _phoneController.text.trim().isNotEmpty) {
+              debugPrint('🤖 إرسال OTP تلقائياً للاختبار...');
+              _sendOTP();
+            }
+          });
+        }
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _phoneController.dispose();
     super.dispose();
@@ -27,6 +49,13 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    final phoneNumber = _phoneController.text.trim();
+    
+    // Logging للاختبار
+    if (kDebugMode) {
+      debugPrint('📱 محاولة إرسال OTP إلى: $phoneNumber');
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -36,11 +65,20 @@ class _LoginScreenState extends State<LoginScreen> {
       onCodeSent: (String verificationId) {
         // التأكد من أن setState و Navigator يتم استدعاؤهما في main thread
         if (!mounted) return;
+        
+        // Logging للاختبار
+        if (kDebugMode) {
+          debugPrint('✅ تم إرسال OTP بنجاح! verificationId: $verificationId');
+        }
+        
         setState(() {
           _isLoading = false;
         });
         // الانتقال إلى شاشة التحقق مع إرسال verificationId
         if (mounted) {
+          if (kDebugMode) {
+            debugPrint('🚀 الانتقال إلى صفحة التحقق...');
+          }
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -55,6 +93,12 @@ class _LoginScreenState extends State<LoginScreen> {
       onError: (String error) {
         // التأكد من أن setState يتم استدعاؤه في main thread
         if (!mounted) return;
+        
+        // Logging للاختبار
+        if (kDebugMode) {
+          debugPrint('❌ خطأ في إرسال OTP: $error');
+        }
+        
         setState(() {
           _isLoading = false;
         });
