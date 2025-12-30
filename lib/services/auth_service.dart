@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -36,11 +37,20 @@ class AuthService {
           _signInWithCredential(credential);
         },
         verificationFailed: (FirebaseAuthException e) {
-          onError(_getErrorMessage(e.code));
+          // في iOS و Android، قد يتم استدعاء هذا callback من thread مختلف
+          // لذلك نستخدم Future.microtask لضمان التنفيذ في main thread في جميع المنصات
+          Future.microtask(() {
+            onError(_getErrorMessage(e.code));
+          });
         },
         codeSent: (String verificationId, int? resendToken) {
           // تم إرسال الكود بنجاح
-          onCodeSent(verificationId);
+          // في iOS و Android، قد يتم استدعاء هذا callback من thread مختلف
+          // لذلك نستخدم Future.microtask لضمان التنفيذ في main thread في جميع المنصات
+          // هذا يضمن أن callback يتم استدعاؤه في الدورة التالية من event loop
+          Future.microtask(() {
+            onCodeSent(verificationId);
+          });
         },
         codeAutoRetrievalTimeout: (String verificationId) {
           // انتهت مهلة الاسترجاع التلقائي

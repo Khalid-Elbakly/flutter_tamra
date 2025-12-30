@@ -34,25 +34,33 @@ class _LoginScreenState extends State<LoginScreen> {
     await _authService.sendOTP(
       phoneNumber: _phoneController.text.trim(),
       onCodeSent: (String verificationId) {
+        // التأكد من أن setState و Navigator يتم استدعاؤهما في main thread
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
         });
         // الانتقال إلى شاشة التحقق مع إرسال verificationId
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => VerifyScreen(
-              verificationId: verificationId,
-              phoneNumber: _phoneController.text.trim(),
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VerifyScreen(
+                verificationId: verificationId,
+                phoneNumber: _phoneController.text.trim(),
+              ),
             ),
-          ),
-        );
+          );
+        }
       },
       onError: (String error) {
+        // التأكد من أن setState يتم استدعاؤه في main thread
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
         });
-        _showError(error);
+        if (mounted) {
+          _showError(error);
+        }
       },
     );
   }
