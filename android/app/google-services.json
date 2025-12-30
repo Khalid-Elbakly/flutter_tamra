@@ -1,0 +1,59 @@
+{
+  "project_info": {
+    "project_number": "972692803858",
+    "project_id": "tamra-f6dab",
+    "storage_bucket": "tamra-f6dab.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:972692803858:android:feb2aba08217b2623ca3cb",
+        "android_client_info": {
+          "package_name": "com.example.tamra"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4ntsu_HqHmY-K7vPf-zU1FyKa1Xy0rZQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:972692803858:android:d83614db04e27d153ca3cb",
+        "android_client_info": {
+          "package_name": "com.example.tamra_business"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4ntsu_HqHmY-K7vPf-zU1FyKa1Xy0rZQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
+
+
+
+
+
+
+
+
+
+
+

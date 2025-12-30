@@ -1,0 +1,99 @@
+{
+  "@@locale": "ar",
+  "appName": "تمرة",
+  "@appName": {
+    "description": "The application name"
+  },
+  "newAddress": "عنوان جديد",
+  "@newAddress": {
+    "description": "New address title"
+  },
+  "addressName": "اسم العنوان",
+  "@addressName": {
+    "description": "Address name label"
+  },
+  "addressDescription": "وصف العنوان",
+  "@addressDescription": {
+    "description": "Address description label"
+  },
+  "addressOnMap": "العنوان على الخريطة",
+  "@addressOnMap": {
+    "description": "Address on map button"
+  },
+  "save": "حفظ",
+  "@save": {
+    "description": "Save button"
+  },
+  "home": "الرئيسية",
+  "@home": {
+    "description": "Home navigation label"
+  },
+  "basket": "السلة",
+  "@basket": {
+    "description": "Basket navigation label"
+  },
+  "providers": "الموردين",
+  "@providers": {
+    "description": "Providers navigation label"
+  },
+  "myAccount": "حسابي",
+  "@myAccount": {
+    "description": "My account navigation label"
+  },
+  "deliveryTo": "التوصيل الى",
+  "@deliveryTo": {
+    "description": "Delivery to label"
+  },
+  "searchProduct": "البحث عن منتج",
+  "@searchProduct": {
+    "description": "Search product placeholder"
+  },
+  "fruits": "فواكه",
+  "@fruits": {
+    "description": "Fruits category"
+  },
+  "vegetables": "خضار",
+  "@vegetables": {
+    "description": "Vegetables category"
+  },
+  "papers": "ورقيات",
+  "@papers": {
+    "description": "Papers category"
+  },
+  "citrus": "حمضيات",
+  "@citrus": {
+    "description": "Citrus category"
+  },
+  "tropical": "استوائة",
+  "@tropical": {
+    "description": "Tropical category"
+  },
+  "local": "محليه",
+  "@local": {
+    "description": "Local category"
+  },
+  "selectLanguage": "اختر اللغة",
+  "@selectLanguage": {
+    "description": "Select language title"
+  },
+  "arabic": "العربية",
+  "@arabic": {
+    "description": "Arabic language name"
+  },
+  "english": "English",
+  "@english": {
+    "description": "English language name"
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+

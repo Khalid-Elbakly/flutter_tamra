@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tamra/presentation/screens/Providers_screen.dart';
 import 'package:tamra/presentation/screens/account_screen.dart';
 import 'package:tamra/presentation/screens/basket_screen.dart';
 import 'package:tamra/presentation/screens/home_screen.dart';
-import 'dart:async';
-import '../../app_router.dart';
-import '../../constants/strings.dart';
+import '../../l10n/app_localizations.dart';
 
 class LayoutScreen extends StatefulWidget {
   const LayoutScreen({Key? key}) : super(key: key);
@@ -30,12 +29,21 @@ class _LayoutScreenState extends State<LayoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final appRouter = new AppRouter();
-    return SafeArea(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.white,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarColor: Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
       child: Scaffold(
-          backgroundColor: Colors.white,
-          resizeToAvoidBottomInset: false,
-          bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        resizeToAvoidBottomInset: false,
+        body: SafeArea(
+          child: _widgetOptions.elementAt(_selectedIndex),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
             selectedItemColor: Color(0XFF7C3425),
             selectedLabelStyle:
@@ -43,29 +51,28 @@ class _LayoutScreenState extends State<LayoutScreen> {
             unselectedItemColor: Color(0XFF707070),
             unselectedLabelStyle:
                 TextStyle(color: Color(0XFF707070), fontSize: 15),
-            items: const <BottomNavigationBarItem>[
+            items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.home),
-                label: 'الرئيسية',
+                label: AppLocalizations.of(context)?.home ?? 'الرئيسية',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.shopping_cart_outlined),
-                label: 'السلة',
+                label: AppLocalizations.of(context)?.basket ?? 'السلة',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.store),
-                label: 'الموردين',
+                label: AppLocalizations.of(context)?.providers ?? 'الموردين',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.manage_accounts),
-                label: 'حسابي',
+                label: AppLocalizations.of(context)?.myAccount ?? 'حسابي',
               ),
             ],
             currentIndex: _selectedIndex,
             onTap: _onItemTapped,
           ),
-          body: _widgetOptions.elementAt(_selectedIndex)
-          ),
+      ),
     );
   }
 

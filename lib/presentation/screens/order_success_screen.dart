@@ -1,24 +1,40 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-import '../../app_router.dart';
-import '../../constants/strings.dart';
+import 'package:flutter/services.dart';
+import 'package:tamra/models/cart_item.dart';
+import 'package:tamra/presentation/screens/layout_screen.dart';
+import 'package:tamra/presentation/widgets/custom_gradient_divider.dart';
 
 class OrderSuccessScreen extends StatefulWidget {
-  const OrderSuccessScreen({Key? key}) : super(key: key);
+  final String deliveryAddress;
+  final String deliveryAddressName;
+  final List<CartItem> items;
+  final double deliveryFee;
+  final double total;
+
+  const OrderSuccessScreen({
+    Key? key,
+    required this.deliveryAddress,
+    required this.deliveryAddressName,
+    required this.items,
+    required this.deliveryFee,
+    required this.total,
+  }) : super(key: key);
+
   @override
   State<OrderSuccessScreen> createState() => _OrderSuccessScreenState();
 }
 
-enum SingingCharacter { english, arabic }
-
 class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
-  SingingCharacter? _character = SingingCharacter.english;
-
   @override
   Widget build(BuildContext context) {
-    final appRouter = new AppRouter();
-
-    return SafeArea(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.white,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarColor: Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
       child: Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
@@ -27,13 +43,14 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
             elevation: 0.0,
             centerTitle: true,
             backgroundColor: Colors.transparent,
+            toolbarHeight: kToolbarHeight,
             leadingWidth: 300,
             leading: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(width: 20),
                 InkWell(
-                  onTap: (){
+                  onTap: () {
                     Navigator.pop(context);
                   },
                   child: Icon(
@@ -90,14 +107,12 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
                           height: 10,
                         ),
                         Text('سيتم تجهيز و توصيل طلبك في غضون 4 ساعات',
-                        textAlign: TextAlign.center,
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Color(0XFF888888),
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
                             )),
-                           
-                       
                       ],
                     ),
                   ),
@@ -122,12 +137,20 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
                         SizedBox(
                           width: 10,
                         ),
-                        Text('نجاة الشامسي للفواكه فرع الاول',
+                        Expanded(
+                          child: Text(
+                            widget.deliveryAddressName.isNotEmpty
+                                ? widget.deliveryAddressName
+                                : widget.deliveryAddress,
                             style: TextStyle(
                               color: Color(0XFF7C3425),
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                            )),
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -146,86 +169,53 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: Divider(
-                      color: Color(0XFF707070),
-                      height: 0.7,
-                      thickness: 0.7,
-                    ),
+                    child: CustomGradientDivider(),
                   ),
-                  Row(
-                    children: [
-                      Text('تفاح اسباني ',
-                          style: TextStyle(
-                            color: Color(0XFF3D3D3D),
-                            fontSize: 17,
-                            fontWeight: FontWeight.w500,
-                          )),
-                          Expanded(
-                            child: Column(
+                  ...widget.items.map((item) {
+                    return Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                item.nameAr,
+                                style: TextStyle(
+                                  color: Color(0XFF3D3D3D),
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Text('200 كيلو ',
-                            style: TextStyle(
-                              color: Color(0XFF3D3D3D),
-                              fontSize: 17,
-                              fontWeight: FontWeight.w500,
-                            )),
-                            Text('100 رس ',
-                            style: TextStyle(
-                              color: Color(0XFF3D3D3D),
-                              fontSize: 17,
-                              fontWeight: FontWeight.w500,
-                            )),
+                                Text(
+                                  '${item.quantity} ${item.packagingWeight}',
+                                  style: TextStyle(
+                                    color: Color(0XFF3D3D3D),
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Text(
+                                  '${item.totalPrice.toStringAsFixed(2)} رس',
+                                  style: TextStyle(
+                                    color: Color(0XFF3D3D3D),
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
                               ],
                             ),
-                          )
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: Divider(
-                      color: Color(0XFF707070),
-                      height: 0.7,
-                      thickness: 0.7,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Text('موز شربتلي',
-                          style: TextStyle(
-                            color: Color(0XFF3D3D3D),
-                            fontSize: 17,
-                            fontWeight: FontWeight.w500,
-                          )),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text('300 كيلو ',
-                            style: TextStyle(
-                              color: Color(0XFF3D3D3D),
-                              fontSize: 17,
-                              fontWeight: FontWeight.w500,
-                            )),
-                            Text('150 رس ',
-                            style: TextStyle(
-                              color: Color(0XFF3D3D3D),
-                              fontSize: 17,
-                              fontWeight: FontWeight.w500,
-                            )),
-                              ],
-                            ),
-                          )
-                    ],
-                  ),
-                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: Divider(
-                      color: Color(0XFF707070),
-                      height: 0.7,
-                      thickness: 0.7,
-                    ),
-                  ),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: CustomGradientDivider(),
+                        ),
+                      ],
+                    );
+                  }).toList(),
                   Row(
                     children: [
                       Text('التوصيل',
@@ -234,22 +224,24 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                           )),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text('80 رس',
-                            style: TextStyle(
-                              color: Color(0XFF3D3D3D),
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            )),
-                            
-                              ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '${widget.deliveryFee.toStringAsFixed(2)} رس',
+                              style: TextStyle(
+                                color: Color(0XFF3D3D3D),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          )
+                          ],
+                        ),
+                      )
                     ],
                   ),
+                  SizedBox(height: 10),
                   Row(
                     children: [
                       Text('الاجمالي',
@@ -258,41 +250,55 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen> {
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                           )),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text('450 رس',
-                            style: TextStyle(
-                              color: Color(0XFF3D3D3D),
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                            )),
-                            
-                              ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '${widget.total.toStringAsFixed(2)} رس',
+                              style: TextStyle(
+                                color: Color(0XFF3D3D3D),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          )
+                          ],
+                        ),
+                      )
                     ],
                   ),
-                  
+                  SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: () {
+                      // إزالة جميع الصفحات من الستاك والعودة للصفحة الرئيسية
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => LayoutScreen(),
+                        ),
+                        (route) => false,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0XFF7C3425),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      'العودة للصفحة الرئيسية',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
           )),
     );
-  }
-
-  startTime() async {
-    var duration = new Duration(seconds: 3);
-    // return new Timer(
-    //     duration,route
-    //    );
-  }
-
-  route() {
-    // Navigator.push(context, MaterialPageRoute(
-    //     builder: (context) => LoginScreen()
-    //   )
-    // );
   }
 }

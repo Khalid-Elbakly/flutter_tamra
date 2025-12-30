@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tamra/presentation/screens/verify_screen.dart';
-import 'dart:async';
-import '../../app_router.dart';
-import '../../constants/strings.dart';
+import 'package:tamra/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -12,10 +11,69 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _phoneController = TextEditingController();
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _sendOTP() async {
+    if (_phoneController.text.trim().isEmpty) {
+      _showError('من فضلك أدخل رقم الجوال');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    await _authService.sendOTP(
+      phoneNumber: _phoneController.text.trim(),
+      onCodeSent: (String verificationId) {
+        setState(() {
+          _isLoading = false;
+        });
+        // الانتقال إلى شاشة التحقق مع إرسال verificationId
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VerifyScreen(
+              verificationId: verificationId,
+              phoneNumber: _phoneController.text.trim(),
+            ),
+          ),
+        );
+      },
+      onError: (String error) {
+        setState(() {
+          _isLoading = false;
+        });
+        _showError(error);
+      },
+    );
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final appRouter = new AppRouter();
-    return SafeArea(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Directionality(
@@ -29,11 +87,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 fit: BoxFit.fill,
               ),
             ),
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 130,
-                ),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).padding.top + 30,
+                  ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -63,12 +122,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Directionality(
                           textDirection: TextDirection.ltr,
                           child: TextField(
-                              decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
+                            controller: _phoneController,
+                            keyboardType: TextInputType.phone,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              hintText: '05xxxxxxxx',
+                              prefixText: '+966 ',
                             ),
-                            hintText: '',
-                          )),
+                          ),
                         ),
                       ),
                     )
@@ -91,23 +154,48 @@ class _LoginScreenState extends State<LoginScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.arrow_back_ios, size: 18),
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => VerifyScreen()));
-                      },
-                      child: Text('التالي',
-                          style: TextStyle(
-                            color: Color(0XFF575757),
-                            fontSize: 18,
-                          )),
-                    )
+                    if (_isLoading)
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Color(0XFF575757)),
+                        ),
+                      )
+                    else ...[
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: _sendOTP,
+                          borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: EdgeInsets.all(2),
+                            child: Icon(Icons.arrow_back_ios, size: 18, color: Color(0XFF575757)),
+                          ),
+                        ),
+                      ),
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: _sendOTP,
+                          borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+                            child: Text(
+                              'التالي',
+                              style: TextStyle(
+                                color: Color(0XFF575757),
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ],
+            ),
             ),
           ),
         ),
@@ -115,17 +203,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  startTime() async {
-    var duration = new Duration(seconds: 3);
-    // return new Timer(
-    //     duration,route
-    //    );
-  }
-
-  route() {
-    // Navigator.push(context, MaterialPageRoute(
-    //     builder: (context) => LoginScreen()
-    //   )
-    // );
-  }
 }

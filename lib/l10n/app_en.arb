@@ -1,0 +1,99 @@
+{
+  "@@locale": "en",
+  "appName": "Tamra",
+  "@appName": {
+    "description": "The application name"
+  },
+  "newAddress": "New Address",
+  "@newAddress": {
+    "description": "New address title"
+  },
+  "addressName": "Address Name",
+  "@addressName": {
+    "description": "Address name label"
+  },
+  "addressDescription": "Address Description",
+  "@addressDescription": {
+    "description": "Address description label"
+  },
+  "addressOnMap": "Address on Map",
+  "@addressOnMap": {
+    "description": "Address on map button"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save button"
+  },
+  "home": "Home",
+  "@home": {
+    "description": "Home navigation label"
+  },
+  "basket": "Basket",
+  "@basket": {
+    "description": "Basket navigation label"
+  },
+  "providers": "Providers",
+  "@providers": {
+    "description": "Providers navigation label"
+  },
+  "myAccount": "My Account",
+  "@myAccount": {
+    "description": "My account navigation label"
+  },
+  "deliveryTo": "Delivery To",
+  "@deliveryTo": {
+    "description": "Delivery to label"
+  },
+  "searchProduct": "Search for product",
+  "@searchProduct": {
+    "description": "Search product placeholder"
+  },
+  "fruits": "Fruits",
+  "@fruits": {
+    "description": "Fruits category"
+  },
+  "vegetables": "Vegetables",
+  "@vegetables": {
+    "description": "Vegetables category"
+  },
+  "papers": "Papers",
+  "@papers": {
+    "description": "Papers category"
+  },
+  "citrus": "Citrus",
+  "@citrus": {
+    "description": "Citrus category"
+  },
+  "tropical": "Tropical",
+  "@tropical": {
+    "description": "Tropical category"
+  },
+  "local": "Local",
+  "@local": {
+    "description": "Local category"
+  },
+  "selectLanguage": "Select Language",
+  "@selectLanguage": {
+    "description": "Select language title"
+  },
+  "arabic": "العربية",
+  "@arabic": {
+    "description": "Arabic language name"
+  },
+  "english": "English",
+  "@english": {
+    "description": "English language name"
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+

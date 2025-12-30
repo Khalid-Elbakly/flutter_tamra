@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tamra/presentation/screens/login_screen.dart';
+import 'package:tamra/presentation/screens/layout_screen.dart';
+import 'package:tamra/services/auth_service.dart';
 import 'dart:async';
-import '../../app_router.dart';
-import '../../constants/strings.dart';
 
 class IntroScreen extends StatefulWidget {
   const IntroScreen({Key? key}) : super(key: key);
@@ -11,15 +11,16 @@ class IntroScreen extends StatefulWidget {
 }
 
 class _IntroScreenState extends State<IntroScreen> {
+  final AuthService _authService = AuthService();
+
+  @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     startTime();
   }
 
   @override
   Widget build(BuildContext context) {
-    final appRouter = new AppRouter();
     return Scaffold(
       body: Container(
         width: MediaQuery.of(context).size.width,
@@ -39,14 +40,30 @@ class _IntroScreenState extends State<IntroScreen> {
   startTime() async {
     var duration = new Duration(seconds: 2);
     return new Timer(
-        duration,route
+        duration, route
        );
   }
 
   route() {
-    Navigator.push(context, MaterialPageRoute(
-        builder: (context) => LoginScreen()
-      )
-    );
+    // التحقق من حالة تسجيل الدخول
+    final currentUser = _authService.currentUser;
+    
+    if (currentUser != null) {
+      // المستخدم مسجل دخول - الانتقال مباشرة للصفحة الرئيسية
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LayoutScreen(),
+        ),
+      );
+    } else {
+      // المستخدم غير مسجل دخول - الانتقال لشاشة تسجيل الدخول
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoginScreen(),
+        ),
+      );
+    }
   }
 }
