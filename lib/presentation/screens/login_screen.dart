@@ -15,6 +15,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final AuthService _authService = AuthService();
   bool _isLoading = false;
+  final List<String> _logs = [];
+  final ScrollController _logsScrollController = ScrollController();
+  bool _showLogger = false;
 
   @override
   void initState() {
@@ -40,21 +43,48 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void dispose() {
     _phoneController.dispose();
+    _logsScrollController.dispose();
     super.dispose();
+  }
+
+  void _addLog(String message) {
+    final timestamp = DateTime.now().toString().substring(0, 19);
+    setState(() {
+      _logs.add('[$timestamp] $message');
+      // Scroll to bottom
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_logsScrollController.hasClients) {
+          _logsScrollController.animateTo(
+            _logsScrollController.position.maxScrollExtent,
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+    });
+    // Also print to console
+    print('[$timestamp] $message');
+  }
+
+  void _clearLogs() {
+    setState(() {
+      _logs.clear();
+    });
+  }
+
+  String _getAllLogs() {
+    return _logs.join('\n');
   }
 
   Future<void> _sendOTP() async {
     if (_phoneController.text.trim().isEmpty) {
       _showError('من فضلك أدخل رقم الجوال');
+      _addLog('❌ خطأ: لم يتم إدخال رقم الجوال');
       return;
     }
 
     final phoneNumber = _phoneController.text.trim();
-    
-    // Logging للاختبار
-    if (kDebugMode) {
-      debugPrint('📱 محاولة إرسال OTP إلى: $phoneNumber');
-    }
+    _addLog('📱 محاولة إرسال OTP إلى: $phoneNumber');
 
     setState(() {
       _isLoading = true;
@@ -66,19 +96,15 @@ class _LoginScreenState extends State<LoginScreen> {
         // التأكد من أن setState و Navigator يتم استدعاؤهما في main thread
         if (!mounted) return;
         
-        // Logging للاختبار
-        if (kDebugMode) {
-          debugPrint('✅ تم إرسال OTP بنجاح! verificationId: $verificationId');
-        }
+        _addLog('✅ تم إرسال OTP بنجاح!');
+        _addLog('🔑 verificationId: $verificationId');
         
         setState(() {
           _isLoading = false;
         });
         // الانتقال إلى شاشة التحقق مع إرسال verificationId
         if (mounted) {
-          if (kDebugMode) {
-            debugPrint('🚀 الانتقال إلى صفحة التحقق...');
-          }
+          _addLog('🚀 الانتقال إلى صفحة التحقق...');
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -94,10 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
         // التأكد من أن setState يتم استدعاؤه في main thread
         if (!mounted) return;
         
-        // Logging للاختبار
-        if (kDebugMode) {
-          debugPrint('❌ خطأ في إرسال OTP: $error');
-        }
+        _addLog('❌ خطأ في إرسال OTP: $error');
         
         setState(() {
           _isLoading = false;
@@ -156,6 +179,28 @@ class _LoginScreenState extends State<LoginScreen> {
                     Image.asset('assets/images/logo_1.png', width: 170),
                   ],
                 ),
+                // Logger Toggle Button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: IconButton(
+                        icon: Icon(
+                          _showLogger ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _showLogger = !_showLogger;
+                          });
+                        },
+                        tooltip: _showLogger ? 'إخفاء السجلات' : 'إظهار السجلات',
+                      ),
+                    ),
+                  ],
+                ),
                 SizedBox(
                   height: 100,
                 ),
@@ -205,9 +250,97 @@ class _LoginScreenState extends State<LoginScreen> {
                 //             ))
                 //   ],
                 // ),
-                SizedBox(
-                  height: 180,
-                ),
+                // Logger Widget
+                if (_showLogger)
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white.withOpacity(0.3)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'السجلات (Logs)',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.copy, color: Colors.white, size: 18),
+                                    onPressed: () {
+                                      Clipboard.setData(ClipboardData(text: _getAllLogs()));
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('تم نسخ السجلات'),
+                                          duration: Duration(seconds: 1),
+                                        ),
+                                      );
+                                    },
+                                    tooltip: 'نسخ السجلات',
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.clear, color: Colors.white, size: 18),
+                                    onPressed: _clearLogs,
+                                    tooltip: 'مسح السجلات',
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8),
+                          Expanded(
+                            child: Container(
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: _logs.isEmpty
+                                  ? Center(
+                                      child: Text(
+                                        'لا توجد سجلات',
+                                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                                      ),
+                                    )
+                                  : ListView.builder(
+                                      controller: _logsScrollController,
+                                      itemCount: _logs.length,
+                                      itemBuilder: (context, index) {
+                                        return Padding(
+                                          padding: EdgeInsets.symmetric(vertical: 2),
+                                          child: SelectableText(
+                                            _logs[index],
+                                            style: TextStyle(
+                                              color: Colors.white70,
+                                              fontSize: 11,
+                                              fontFamily: 'monospace',
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  SizedBox(
+                    height: 180,
+                  ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
