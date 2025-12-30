@@ -48,25 +48,34 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _addLog(String message) {
+    if (!mounted) return; // التحقق من mounted قبل setState
+    
     final timestamp = DateTime.now().toString().substring(0, 19);
-    setState(() {
-      _logs.add('[$timestamp] $message');
-      // Scroll to bottom
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_logsScrollController.hasClients) {
-          _logsScrollController.animateTo(
-            _logsScrollController.position.maxScrollExtent,
-            duration: Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-        }
+    // Also print to console
+    debugPrint('[$timestamp] $message');
+    
+    // استخدام Future.microtask لضمان التنفيذ في main thread
+    Future.microtask(() {
+      if (!mounted) return;
+      
+      setState(() {
+        _logs.add('[$timestamp] $message');
+        // Scroll to bottom
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_logsScrollController.hasClients) {
+            _logsScrollController.animateTo(
+              _logsScrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+            );
+          }
+        });
       });
     });
-    // Also print to console
-    print('[$timestamp] $message');
   }
 
   void _clearLogs() {
+    if (!mounted) return; // التحقق من mounted قبل setState
     setState(() {
       _logs.clear();
     });
@@ -77,62 +86,86 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _sendOTP() async {
-    if (_phoneController.text.trim().isEmpty) {
-      _showError('من فضلك أدخل رقم الجوال');
-      _addLog('❌ خطأ: لم يتم إدخال رقم الجوال');
-      return;
-    }
+    // منع الضغط المتكرر
+    if (_isLoading) return;
+    
+    if (!mounted) return;
+    
+    try {
+      if (_phoneController.text.trim().isEmpty) {
+        _showError('من فضلك أدخل رقم الجوال');
+        _addLog('❌ خطأ: لم يتم إدخال رقم الجوال');
+        return;
+      }
 
-    final phoneNumber = _phoneController.text.trim();
-    _addLog('📱 محاولة إرسال OTP إلى: $phoneNumber');
+      final phoneNumber = _phoneController.text.trim();
+      _addLog('📱 محاولة إرسال OTP إلى: $phoneNumber');
 
-    setState(() {
-      _isLoading = true;
-    });
+      if (!mounted) return;
+      setState(() {
+        _isLoading = true;
+      });
 
-    await _authService.sendOTP(
-      phoneNumber: _phoneController.text.trim(),
-      onCodeSent: (String verificationId) {
-        // التأكد من أن setState و Navigator يتم استدعاؤهما في main thread
-        if (!mounted) return;
-        
-        _addLog('✅ تم إرسال OTP بنجاح!');
-        _addLog('🔑 verificationId: $verificationId');
-        
-        setState(() {
-          _isLoading = false;
-        });
-        // الانتقال إلى شاشة التحقق مع إرسال verificationId
-        if (mounted) {
-          _addLog('🚀 الانتقال إلى صفحة التحقق...');
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => VerifyScreen(
-                verificationId: verificationId,
-                phoneNumber: _phoneController.text.trim(),
+      await _authService.sendOTP(
+        phoneNumber: _phoneController.text.trim(),
+        onCodeSent: (String verificationId) {
+          // التأكد من أن setState و Navigator يتم استدعاؤهما في main thread
+          if (!mounted) return;
+          
+          _addLog('✅ تم إرسال OTP بنجاح!');
+          _addLog('🔑 verificationId: $verificationId');
+          
+          if (!mounted) return;
+          setState(() {
+            _isLoading = false;
+          });
+          // الانتقال إلى شاشة التحقق مع إرسال verificationId
+          if (mounted) {
+            _addLog('🚀 الانتقال إلى صفحة التحقق...');
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => VerifyScreen(
+                  verificationId: verificationId,
+                  phoneNumber: _phoneController.text.trim(),
+                ),
               ),
-            ),
-          );
-        }
-      },
-      onError: (String error) {
-        // التأكد من أن setState يتم استدعاؤه في main thread
-        if (!mounted) return;
-        
-        _addLog('❌ خطأ في إرسال OTP: $error');
-        
-        setState(() {
-          _isLoading = false;
-        });
-        if (mounted) {
-          _showError(error);
-        }
-      },
-    );
+            );
+          }
+        },
+        onError: (String error) {
+          // التأكد من أن setState يتم استدعاؤه في main thread
+          if (!mounted) return;
+          
+          _addLog('❌ خطأ في إرسال OTP: $error');
+          
+          if (!mounted) return;
+          setState(() {
+            _isLoading = false;
+          });
+          if (mounted) {
+            _showError(error);
+          }
+        },
+      );
+    } catch (e) {
+      // معالجة أي أخطاء غير متوقعة
+      debugPrint('خطأ في _sendOTP: $e');
+      if (!mounted) return;
+      
+      setState(() {
+        _isLoading = false;
+      });
+      
+      if (mounted) {
+        _showError('حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى');
+        _addLog('❌ خطأ غير متوقع: $e');
+      }
+    }
   }
 
   void _showError(String message) {
+    if (!mounted) return; // التحقق من mounted قبل استخدام context
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
