@@ -132,7 +132,8 @@ class _ProvidersScreenState extends State<ProvidersScreen> {
           ),
         ),
       ),
-    );
+      ),
+    ));
   }
 
   Widget _buildVendorPlaceholderCard() {
@@ -580,8 +581,8 @@ class _VendorCard extends StatelessWidget {
               ],
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
